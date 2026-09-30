@@ -1,0 +1,9 @@
+card_status: ACTIVE, INACTIVE, BLOCKED, EXPIRED
+expiry: valid, current, expired
+daily: below, equal, above
+monthly: below, equal, above
+balance: below, equal, above
+bin_lookup: available, unavailable
+
+IF [card_status] <> "ACTIVE" THEN [expiry] = "valid" AND [daily] = "below" AND [monthly] = "below" AND [balance] = "below";
+IF [expiry] = "expired" THEN [daily] = "below" AND [monthly] = "below" AND [balance] = "below";

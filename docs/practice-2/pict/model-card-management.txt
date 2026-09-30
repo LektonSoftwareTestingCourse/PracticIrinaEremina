@@ -1,0 +1,13 @@
+operation: create, get, update, delete, generate, reserve
+pan: na, exists, missing
+status: na, ACTIVE, BLOCKED, DELETED
+bin: na, 400000, 400001
+amount: na, below, equal, above
+count: na, one, many
+
+IF [operation] = "create" THEN [pan] = "na" AND [status] = "na" AND [bin] <> "na" AND [amount] = "na" AND [count] = "na";
+IF [operation] = "generate" THEN [pan] = "na" AND [status] = "na" AND [bin] <> "na" AND [amount] = "na" AND [count] <> "na";
+IF [operation] = "get" OR [operation] = "update" OR [operation] = "delete" THEN [pan] <> "na" AND [bin] = "na" AND [amount] = "na" AND [count] = "na";
+IF [operation] = "reserve" THEN [pan] <> "na" AND [bin] = "na" AND [amount] <> "na" AND [count] = "na";
+IF [pan] = "missing" THEN [status] = "na";
+IF [pan] = "exists" THEN [status] <> "na";
