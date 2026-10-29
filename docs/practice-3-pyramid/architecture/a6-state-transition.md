@@ -4,39 +4,43 @@
 
 Диаграммы состояний в проекте не было. Я создала её по enum и бизнес-логике. `DELETED` относится к Card, а `ROLLED_BACK` - к Reservation, не к `TransactionStatus`; строгой матрицы переходов карты в коде нет.
 
+### Состояния карты
+
 ```mermaid
 stateDiagram-v2
-    state "Card" as Card {
-        [*] --> ACTIVE: createCard
-        ACTIVE --> INACTIVE: PATCH / bulk-update
-        ACTIVE --> BLOCKED: PATCH / bulk-update
-        ACTIVE --> EXPIRED: PATCH / bulk-update
-        INACTIVE --> ACTIVE: PATCH / bulk-update
-        BLOCKED --> ACTIVE: PATCH / bulk-update
-        EXPIRED --> ACTIVE: PATCH / bulk-update
-        ACTIVE --> DELETED: DELETE
-        INACTIVE --> DELETED: DELETE
-        BLOCKED --> DELETED: DELETE
-        EXPIRED --> DELETED: DELETE
-        note right of Card
-          Реализация допускает и другие переходы
-          между enum-значениями через PATCH.
-          Автоматический переход по expiryDate не найден.
-        end note
-    }
-
-    state "Authorization outcome / Reservation" as Tx {
-        [*] --> APPROVED: проверки пройдены + reserve
-        [*] --> DECLINED: validation/status/expiry/limits/balance/error
-        APPROVED --> RESERVED: reservation сохранена
-        RESERVED --> ROLLED_BACK: rollback по rrn + pan
-        APPROVED --> DECLINED: publish failure → client response 96
-        note right of Tx
-          TransactionStatus: APPROVED, DECLINED.
-          ReservationStatus: RESERVED, ROLLED_BACK.
-        end note
-    }
+    [*] --> ACTIVE: createCard
+    ACTIVE --> INACTIVE: PATCH / bulk-update
+    ACTIVE --> BLOCKED: PATCH / bulk-update
+    ACTIVE --> EXPIRED: PATCH / bulk-update
+    INACTIVE --> ACTIVE: PATCH / bulk-update
+    BLOCKED --> ACTIVE: PATCH / bulk-update
+    EXPIRED --> ACTIVE: PATCH / bulk-update
+    ACTIVE --> DELETED: DELETE
+    INACTIVE --> DELETED: DELETE
+    BLOCKED --> DELETED: DELETE
+    EXPIRED --> DELETED: DELETE
 ```
+
+Через PATCH и bulk-update код может присвоить и другие значения из `CardStatus`. Автоматического перехода в `EXPIRED` по `expiryDate` я не нашла.
+
+### Результат авторизации
+
+```mermaid
+stateDiagram-v2
+    [*] --> APPROVED: проверки пройдены
+    [*] --> DECLINED: проверка не пройдена
+    APPROVED --> DECLINED: ошибка публикации, код 96
+```
+
+### Состояния резервирования
+
+```mermaid
+stateDiagram-v2
+    [*] --> RESERVED: деньги зарезервированы
+    RESERVED --> ROLLED_BACK: rollback по rrn и pan
+```
+
+`TransactionStatus` содержит только `APPROVED` и `DECLINED`. Состояния `RESERVED` и `ROLLED_BACK` относятся к `ReservationStatus`.
 
 ## Верификация по коду
 
