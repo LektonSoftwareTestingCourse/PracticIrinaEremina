@@ -59,7 +59,7 @@ sequenceDiagram
         SW->>AUTH: POST /api/internal/rollback
         Note over SW,AUTH: Требование: reversal MTI 0400.<br/>Фактический RollbackRequest: rrn, pan, amount.
         AUTH->>CMS: POST /api/cards/{pan}/rollback
-        CMS->>CMS: RESERVED → ROLLED_BACK; return balance
+        CMS->>CMS: RESERVED → ROLLED_BACK, return balance
         CMS-->>AUTH: updated Card
         AUTH-->>SW: rollback APPROVED/DECLINED
         SW-->>GW: DECLINED 96 System error

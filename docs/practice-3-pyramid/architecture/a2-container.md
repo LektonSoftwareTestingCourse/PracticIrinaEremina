@@ -41,7 +41,7 @@ flowchart TB
 
     switch -->|authorize / rollback| auth
     switch -->|POST /api/simulator/merchant/fee| merchant
-    auth -->|GET /api/bin/\{bin\}| bin
+    auth -->|"GET /api/bin/{bin}"| bin
     auth -->|get / reserve / rollback| cms
 
     auth -->|JDBC: limit_usage| db

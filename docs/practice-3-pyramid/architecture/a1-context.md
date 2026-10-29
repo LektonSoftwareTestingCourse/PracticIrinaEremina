@@ -16,10 +16,11 @@ flowchart LR
     end
 
     terminal -->|HTTPS/REST<br/>транзакции| smp
-    merchant -->|HTTPS/REST<br/>транзакции и комиссия| smp
+    merchant -->|HTTPS/REST<br/>транзакции| smp
+    smp -->|HTTP<br/>запрос комиссии| merchant
     user -->|HTTP/REST| smp
     smp -->|WebSocket<br/>поток транзакций| user
-    smp -->|HTTP GET /api/bin/\{bin\}| bin
+    smp -->|"HTTP GET /api/bin/{bin}"| bin
 ```
 
 ## Верификация по коду
