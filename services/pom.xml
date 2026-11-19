@@ -98,6 +98,7 @@
         <profile>
             <id>e2e-tests</id>
             <modules>
+                <module>common</module>
                 <module>e2e-tests</module>
             </modules>
             <properties>

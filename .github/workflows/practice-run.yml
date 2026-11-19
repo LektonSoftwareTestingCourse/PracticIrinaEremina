@@ -1,14 +1,23 @@
 name: Practice Run (heavy checks)
 
 # ТЯЖЁЛЫЙ пайплайн: docker build + запуск всех сервисов + проверка по выбранной
-# практике. Запускается СТУДЕНТОМ вручную через Actions → Run workflow, когда он
-# готов сдавать артефакт. Это экономит Actions-минуты: docker-сборка (~11 образов)
-# выполняется один раз в момент сдачи, а не на каждый push.
+# практике. API-тесты запускаются автоматически для веток practice-5-*.
+# Остальные практики запускаются вручную через Actions и Run workflow.
 #
 # Лёгкие проверки (lint + compile + unit) по-прежнему гоняются автоматически
 # в ci.yml на каждый push.
 
 on:
+  push:
+    branches:
+    - 'practice-5-*'
+    paths:
+    - 'services/**'
+    - 'scripts/run-api-tests.sh'
+    - 'scripts/api-tests-maven-settings.xml'
+    - 'docker-compose.yaml'
+    - '.env.example'
+    - '.github/workflows/practice-run.yml'
   workflow_dispatch:
     inputs:
       practice:
@@ -100,8 +109,9 @@ jobs:
       if: always()
       run: docker compose down -v
 
-  e2e-tests:
-    if: github.event.inputs.practice == '5'
+  api-tests:
+    name: API tests
+    if: github.event_name == 'push' || github.event.inputs.practice == '5'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -112,7 +122,7 @@ jobs:
       env:
         OWNER: ${{ github.repository_owner }}
 
-    - name: Set up JDK 21 for E2E
+    - name: Set up JDK 21 for API tests
       uses: actions/setup-java@v5
       with:
         java-version: '21'
@@ -171,8 +181,14 @@ jobs:
         done
         sleep 15
 
-    - name: Run e2e tests
-      run: mvn -f services/pom.xml -pl e2e-tests -am test -DskipE2eTests=false
+    - name: Run API tests
+      run: >-
+        mvn -f services/pom.xml
+        -s scripts/api-tests-maven-settings.xml
+        -P e2e-tests
+        -pl e2e-tests
+        -am test
+        -DskipE2eTests=false
 
     - name: Show logs on failure
       if: failure()
@@ -224,14 +240,14 @@ jobs:
           -H "Content-Type: application/json" \
           -d '{"count":100,"bins":["400000","400001","400002","400003","400004"]}'
 
-    - name: Run load smoke script (CI smoke check — 10 transactions only)
+    - name: Run load smoke script (CI smoke check - 10 transactions only)
       env:
         LOAD_COUNT: 10
       run: |
         if [ -f scripts/load-smoke.sh ]; then
           chmod +x scripts/load-smoke.sh && ./scripts/load-smoke.sh
         else
-          echo "⚠️ scripts/load-smoke.sh not found — skipping load test"
+          echo "scripts/load-smoke.sh not found - skipping load test"
         fi
 
     - name: Show logs on failure
