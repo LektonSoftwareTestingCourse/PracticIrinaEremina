@@ -110,7 +110,7 @@
 ./scripts/run-api-tests.sh
 ```
 
-Скрипт создает `.env` при отсутствии, собирает и поднимает Docker Compose, ожидает health Gateway, запускает Maven и останавливает стенд. При падении выводятся последние логи контейнеров.
+Скрипт создает `.env` при отсутствии, собирает и поднимает Docker Compose, ожидает состояние healthy у всех сервисов и доступность health Gateway, запускает Maven и останавливает стенд. При падении выводятся последние логи контейнеров.
 
 Запуск только тестов на уже поднятом стеке:
 
@@ -118,7 +118,7 @@
 mvn -f services/pom.xml -P e2e-tests -pl e2e-tests -am test -DskipE2eTests=false
 ```
 
-Workflow `practice-run.yml` запускает e2e job автоматически при push в ветку `practice-5-*` и также поддерживает ручной workflow_dispatch.
+Workflow `practice-run.yml` запускает job API tests автоматически при push в ветку `practice-5-*` и также поддерживает ручной workflow_dispatch.
 
 ## 8. Последовательные прогоны
 
