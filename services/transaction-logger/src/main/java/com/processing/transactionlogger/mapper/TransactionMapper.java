@@ -7,6 +7,8 @@ import com.processing.transactionlogger.model.Transaction;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -102,7 +104,7 @@ public class TransactionMapper {
                 && Objects.equals(transaction.getDeclineReason(), request.declineReason())
                 && Objects.equals(transaction.getAuthCode(), request.authCode())
                 && Objects.equals(transaction.getProcessingTimeMs(), request.processingTimeMs())
-                && Objects.equals(transaction.getTransmissionDateTime(), request.transmissionDateTime());
+                && compareInstant(transaction.getTransmissionDateTime(), request.transmissionDateTime());
     }
 
     private static boolean compareBigDecimal(BigDecimal a, BigDecimal b) {
@@ -113,5 +115,15 @@ public class TransactionMapper {
             return false;
         }
         return a.compareTo(b) == 0;
+    }
+
+    private static boolean compareInstant(Instant a, Instant b) {
+        if (a == null && b == null) {
+            return true;
+        }
+        if (a == null || b == null) {
+            return false;
+        }
+        return Duration.between(a, b).abs().compareTo(Duration.ofNanos(1_000)) <= 0;
     }
 }
